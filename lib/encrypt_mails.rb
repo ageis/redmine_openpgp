@@ -47,7 +47,7 @@ module EncryptMails
           Setting.plugin_openpgp['encrypted_html']
       end
       m.deliver
-
+      
       # render and deliver filtered mail
       reset(header)
       tpl = @_action_name + '.filtered'
@@ -111,7 +111,11 @@ module EncryptMails
         headers[field].each do |user|
 
           # encrypted
-          unless Pgpkey.find_by(user_id: user.id).nil?
+          if Pgpkey.find_by(user_id: user.id).nil?
+            if logger
+	      logger.info "No public key found for #{user} <#{user.mail}> (#{user.id})"
+            end
+	  else
             recipients[:encrypted][field].push user and next
           end
 
